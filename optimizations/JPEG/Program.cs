@@ -103,7 +103,8 @@ namespace JPEG
 							DCT.IDCT2D(channelFreqs, channel);
 							ShiftMatrixValues(channel, 128);
 						}
-						SetPixels(result, _y, cb, cr, PixelFormat.YCbCr, y, x);
+						
+						SetPixels(result, _y, cb, cr, System.Drawing.Imaging.PixelFormat.YCbCr, y, x);
 					}
 				}
 			}
