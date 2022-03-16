@@ -7,10 +7,10 @@ namespace DotTraceExamples
 	{
 		static void Main(string[] args)
 		{
-			BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+			//BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 			//ProgrammRunner.Run(new ComplexOperationTestProgram());
 			//ProgrammRunner.Run(new EdgePreservingSmoothingProgram());
-			//ProgrammRunner.Run(new MeanShiftProgram());
+			ProgrammRunner.Run(new MeanShiftProgram());
 		}
 	}
 }
