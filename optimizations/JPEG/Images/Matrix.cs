@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Threading.Tasks;
 
 namespace JPEG.Images
 {
@@ -25,14 +26,14 @@ namespace JPEG.Images
             var width = bmp.Width - bmp.Width % 8;
             var matrix = new Matrix(height, width);
 
-            for(var j = 0; j < height; j++)
+            Parallel.For(0, height, y =>
             {
-                for(var i = 0; i < width; i++)
+                Parallel.For(0, width, x =>
                 {
-                    var pixel = bmp.GetPixel(i, j);
-                    matrix.Pixels[j, i] = new Pixel(pixel.R, pixel.G, pixel.B, PixelFormat.RGB);
-                }
-            }
+                    var pixel = bmp.GetPixel(x, y);
+                    matrix.Pixels[y, x] = new Pixel(pixel.R, pixel.G, pixel.B, PixelFormat.RGB);
+                });
+            });
 
             return matrix;
         }
@@ -40,15 +41,18 @@ namespace JPEG.Images
         public static explicit operator Bitmap(Matrix matrix)
         {
             var bmp = new Bitmap(matrix.Width, matrix.Height);
+            var width = bmp.Width;
+            var height = bmp.Height;
 
-            for(var j = 0; j < bmp.Height; j++)
+            Parallel.For(0, height, y =>
             {
-                for(var i = 0; i < bmp.Width; i++)
+                Parallel.For(0, width, x =>
                 {
-                    var pixel = matrix.Pixels[j, i];
-                    bmp.SetPixel(i, j, Color.FromArgb(ToByte(pixel.R), ToByte(pixel.G), ToByte(pixel.B)));
-                }
-            }
+                    var pixel = matrix.Pixels[y, x];
+                    bmp.SetPixel(x, y, Color.FromArgb(ToByte(pixel.R), ToByte(pixel.G), ToByte(pixel.B)));
+                });
+            });
+            
 
             return bmp;
         }

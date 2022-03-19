@@ -1,94 +1,85 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using JPEG.Utilities;
 
 namespace JPEG
 {
     public class DCT
     {
-        private static readonly double Sqrt2 = Math.Sqrt(2);
-
-        private static readonly ConcurrentDictionary<double, double> CosCash = new();
-
-        public static double[,] DCT2D(double[,] input)
+        private static readonly float Sqrt2 = MathF.Sqrt(2);
+        
+        public static float[,] DCT2D(float[,] input)
         {
             var height = input.GetLength(0);
             var width = input.GetLength(1);
-            var coeffs = new double[width, height];
+            var coeffs = new float[width, height];
             var beta = Beta(height, width);
 
-            MathEx.LoopByTwoVariables(
-                0, width,
-                0, height,
-                (u, v) =>
+            Parallel.For(0, width, x =>
+            {
+                Parallel.For(0, height, y =>
                 {
-                    var sum = MathEx
-                        .SumByTwoVariables(
-                            0, width,
-                            0, height,
-                            (x, y) => BasisFunction(input[x, y], u, v, x, y, height, width));
-
-                    coeffs[u, v] = sum * beta * Alpha(u) * Alpha(v);
+                    var sum = MathEx.SumByTwoVariables(
+                        0, width,
+                        0, height,
+                        (u, v) =>
+                            BasisFunction(input[u, v], x, y, u, v, height, width)
+                    );
+                    coeffs[x, y] = sum * beta * Alpha(x) * Alpha(x);
                 });
+            });
+            
 
             return coeffs;
         }
 
-        public static void IDCT2D(double[,] coeffs, double[,] output)
+        public static void IDCT2D(float[,] coeffs, float[,] output)
         {
             var beta = Beta(coeffs.GetLength(0), coeffs.GetLength(1));
             var height = coeffs.GetLength(0);
             var width = coeffs.GetLength(1);
 
-            for (var x = 0; x < coeffs.GetLength(1); x++)
+            Parallel.For(0, width, x =>
             {
-                for (var y = 0; y < coeffs.GetLength(0); y++)
+                Parallel.For(0, height, y =>
                 {
                     var sum = MathEx
                         .SumByTwoVariables(
                             0, width,
                             0, height,
                             (u, v) =>
-                                BasisFunction(coeffs[u, v], u, v, x, y, coeffs.GetLength(0), coeffs.GetLength(1)) *
+                                BasisFunction(coeffs[u, v], u, v, x, y, height, width) *
                                 Alpha(u) * Alpha(v));
 
                     output[x, y] = sum * beta;
-                }
-            }
+                });
+            });
         }
 
-        public static double BasisFunction(double a, double u, double v, double x, double y, int height, int width)
+
+        public static float BasisFunction(float a, int u, int v, int x, int y, int height, int width)
         {
-            var xAngle = ((2d * x + 1d) * u * Math.PI) / (2 * width);
-            var yAngle = ((2d * y + 1d) * v * Math.PI) / (2 * height);
+            var xAngle = ((2f * x + 1f) * u * MathF.PI) / (2 * width);
+            var yAngle = ((2f * y + 1f) * v * MathF.PI) / (2 * height);
 
-            if (!CosCash.ContainsKey(xAngle))
-            {
-                CosCash[xAngle] = Math.Cos(xAngle);
-            }
+            var b = MathF.Cos(xAngle);
 
-            if (!CosCash.ContainsKey(yAngle))
-            {
-                CosCash[yAngle] = Math.Cos(yAngle);
-            }
-            
-            var b = CosCash[xAngle];
-
-            var c = CosCash[yAngle];
+            var c = MathF.Cos(yAngle);
 
             return a * b * c;
         }
 
-        private static double Alpha(int u)
+        private static float Alpha(int u)
         {
             if (u == 0)
                 return 1 / Sqrt2;
             return 1;
         }
 
-        private static double Beta(int height, int width)
+        private static float Beta(int height, int width)
         {
-            return 1d / width + 1d / height;
+            return 1f / width + 1f / height;
         }
     }
 }
