@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using JPEG.Images;
 using PixelFormat = JPEG.Images.PixelFormat;
 
@@ -12,6 +13,8 @@ namespace JPEG
 	class Program
 	{
 		const int CompressionQuality = 70;
+		private static readonly IReadOnlyList<Func<Pixel,double>> ChannelSelectors
+			= new Func<Pixel, double>[] { p => p.Y, p => p.Cb, p => p.Cr };
 
 		static void Main(string[] args)
 		{
@@ -62,7 +65,7 @@ namespace JPEG
 			{
 				for(var x = 0; x < matrix.Width; x += DCTSize)
 				{
-					foreach (var selector in new Func<Pixel, double>[] {p => p.Y, p => p.Cb, p => p.Cr})
+					foreach (var selector in ChannelSelectors)
 					{
 						var subMatrix = GetSubMatrix(matrix, y, DCTSize, x, DCTSize, selector);
 						ShiftMatrixValues(subMatrix, -128);
@@ -104,7 +107,7 @@ namespace JPEG
 							ShiftMatrixValues(channel, 128);
 						}
 						
-						SetPixels(result, _y, cb, cr, System.Drawing.Imaging.PixelFormat.YCbCr, y, x);
+						SetPixels(result, _y, cb, cr, PixelFormat.YCbCr, y, x);
 					}
 				}
 			}
