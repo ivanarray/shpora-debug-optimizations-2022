@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Drawing;
 using System.Threading.Tasks;
 using JPEG.Utilities;
 
@@ -24,7 +25,7 @@ namespace JPEG
                         0, width,
                         0, height,
                         (u, v) =>
-                            BasisFunction(input[u, v], x, y, u, v, height, width)
+                            BasisFunction(input[u, v], u, v, u, v, height, width)
                     );
                     coeffs[x, y] = sum * beta * Alpha(x) * Alpha(x);
                 });
@@ -80,6 +81,16 @@ namespace JPEG
         private static float Beta(int height, int width)
         {
             return 1f / width + 1f / height;
+        }
+
+        private static float Sum(float[,] coeffs, Point xy)
+        {
+            var width = coeffs.GetLength(1);
+            var height = coeffs.GetLength(0);
+
+            
+
+            throw new NotImplementedException();
         }
     }
 }
