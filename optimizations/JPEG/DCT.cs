@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace JPEG
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class DCT
     {
         private static readonly float Sqrt2 = MathF.Sqrt(2);

@@ -31,8 +31,6 @@ namespace JPEG
 
             public int GetHashCode(BitsWithLength obj)
             {
-                if (obj == null)
-                    return 0;
                 return ((397 * obj.Bits) << 5) ^ (17 * obj.BitsCount);
             }
         }
