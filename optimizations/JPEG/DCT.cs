@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Drawing;
 using System.Threading.Tasks;
-using JPEG.Utilities;
 
 namespace JPEG
 {
@@ -21,15 +18,8 @@ namespace JPEG
             {
                 Parallel.For(0, height, v =>
                 {
-                    // var sum = MathEx
-                    //     .SumByTwoVariables(
-                    //         0, width,
-                    //         0, height,
-                    //         (x, y) => BasisFunction(input[x, y], u, v, x, y, height, width));
-                    //
-                    // coeffs[u, v] = sum * Beta(height, width) * Alpha(u) * Alpha(v);
-                     var sum = DCT2DSum(coeffs, u, v);
-                    coeffs[u,v]  = sum * beta * Alpha(u) * Alpha(v);
+                    var sum = DCT2DSum(input, u, v);
+                    coeffs[u, v] = sum * beta * Alpha(u) * Alpha(v);
                 });
             });
 
@@ -47,16 +37,7 @@ namespace JPEG
             {
                 Parallel.For(0, height, y =>
                 {
-                    var sum = MathEx
-                        .SumByTwoVariables(
-                            0, coeffs.GetLength(1),
-                            0, coeffs.GetLength(0),
-                            (u, v) =>
-                                BasisFunction(coeffs[u, v], u, v, x, y, coeffs.GetLength(0), coeffs.GetLength(1)) *
-                                Alpha(u) * Alpha(v));
-
-                    //output[x, y] = sum * Beta(coeffs.GetLength(0), coeffs.GetLength(1));
-                    // var sum = IDCT2DSum(coeffs, x, y);
+                    var sum = IDCT2DSum(coeffs, x, y);
 
                     output[x, y] = sum * beta;
                 });
@@ -88,16 +69,16 @@ namespace JPEG
             return 1f / width + 1f / height;
         }
 
-        private static float DCT2DSum(float[,] coeffs, int x, int y)
+        private static float DCT2DSum(float[,] input, int u, int v)
         {
-            var width = coeffs.GetLength(1);
-            var height = coeffs.GetLength(0);
+            var width = input.GetLength(1);
+            var height = input.GetLength(0);
 
             var sum = 0f;
-            for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
+            for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
             {
-                sum += BasisFunction(coeffs[x, y], x, y, i, j, height, width);
+                sum += BasisFunction(input[x, y], u, v, x, y, height, width);
             }
 
             return sum;
