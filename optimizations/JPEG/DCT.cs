@@ -18,10 +18,11 @@ namespace JPEG
 
             Parallel.For(0, width, u =>
             {
+                var alpha = Alpha(u);
                 Parallel.For(0, height, v =>
                 {
                     var sum = DCT2DSum(input, u, v);
-                    coeffs[u, v] = sum * beta * Alpha(u) * Alpha(v);
+                    coeffs[u, v] = sum * beta * alpha * Alpha(v);
                 });
             });
 
@@ -93,10 +94,13 @@ namespace JPEG
 
             var sum = 0f;
             for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
             {
-                sum += BasisFunction(coeffs[i, j], i, j, x, y, height, width)
-                       * Alpha(i) * Alpha(j);
+                var alpha = Alpha(i);
+                for (int j = 0; j < height; j++)
+                {
+                    sum += BasisFunction(coeffs[i, j], i, j, x, y, height, width)
+                           * alpha * Alpha(j);
+                }
             }
 
             return sum;
